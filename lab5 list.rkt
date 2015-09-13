@@ -3,13 +3,13 @@
       (append (list a) (my-range (+ a d) b d))
       '()))
 
-(define (my-flatten a)
-  (if (null? a)
+(define (my-flatten xs)
+  (if (null? xs)
       '()
-      (let ((x (car a)))
+      (let ((x (car xs)))
         (if (list? x)
-            (append (my-flatten x) (my-flatten (cdr a)))
-            (append (list x) (my-flatten (cdr a)))))))
+            (append (my-flatten x) (my-flatten (cdr xs)))
+            (append (list x) (my-flatten (cdr xs)))))))
 
 (define (my-element? x xs)
   (cond ((null? xs)          #f)

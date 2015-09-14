@@ -41,9 +41,8 @@
   (difference (union xs ys) (intersection xs ys)))
 
 (define (set-eq? xs ys)
-  (if (= (length xs) (length ys))
-      (null? (symmetric-difference xs ys))
-      #f))
+  (and (= (length xs) (length ys))
+       (null? (symmetric-difference xs ys))))
 
 (list->set '(1 1 2 3))
 (set? '(1 2 3))

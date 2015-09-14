@@ -19,6 +19,7 @@
   
   (loop f x0 x1 e))
 
+;; tests
 (round
  (newton (lambda (x) (* x x)) 
          (lambda (x) (* 2 x)) 

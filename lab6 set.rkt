@@ -1,3 +1,4 @@
+
 (define (list->set xs)
   (define (helper set xs)
     (if (null? xs)
@@ -44,6 +45,7 @@
   (and (= (length xs) (length ys))
        (null? (symmetric-difference xs ys))))
 
+;; tests
 (list->set '(1 1 2 3))
 (set? '(1 2 3))
 (set? '(1 2 3 3))

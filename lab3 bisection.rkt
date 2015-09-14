@@ -14,4 +14,5 @@
         (( = 0 (f b)) b)
         (else (mid a b))))
 
+;; tests
 (bisection cos -3.0 0.0 0.001)

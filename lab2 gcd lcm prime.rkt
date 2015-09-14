@@ -17,6 +17,7 @@
   
   (= 0 (remainder (+ 1 (fact (- n 1))) n)))
 
+;; tests
 (my-gcd 3542 2464)
 (my-lcm 3 4)
 (prime? 11)

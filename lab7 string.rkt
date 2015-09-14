@@ -46,6 +46,7 @@
   
   (helper '() str))
 
+;; tests
 (string-trim-left  "\t\tabc def")
 (string-trim-right "abc def\t")
 (string-trim       "\t abc def \n")

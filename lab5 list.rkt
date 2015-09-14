@@ -34,6 +34,7 @@
       (op (car xs) (cadr xs))
       (op (car xs) (my-fold-right op (cdr xs)))))
 
+;; tests
 (my-range  0 11 3)
 (my-flatten '((1) 2 (3 (4 5) (6 (7 8))) 9))
 (my-element? 1 '(3 2 1)) 

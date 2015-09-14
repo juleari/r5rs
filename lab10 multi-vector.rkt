@@ -54,6 +54,7 @@
        (= (length indices) (vector-ref m 1))
        (vector-set! m (get-index indices (cdr (take-lens m))) x)))
 
+;; tests
 (define m (make-multi-vector '(11 12 9 16)))
 (multi-vector? m)
 (multi-vector-set! m '(10 7 6 12) 'test)

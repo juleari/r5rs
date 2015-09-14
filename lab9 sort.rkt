@@ -35,5 +35,6 @@
   
   (helper '() xs))
 
+;; tests
 (selection-sort <= '(9 6 2 4 3 5 7 1 8 0))
 (insertion-sort <= '(9 6 2 4 3 5 7 1 8 0))

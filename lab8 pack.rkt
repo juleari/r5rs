@@ -43,6 +43,7 @@
   
   (flatten (unpack xs)))
 
+;; tests
 (pack '(a a a f f f f b b l a a c))
 (pack '((1 2) (1 2) (2 3)))
 (encode '(a a a b b c))

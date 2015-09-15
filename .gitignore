@@ -4,3 +4,4 @@
 labs.rkt
 
 *.rkt#*
+*.scm~

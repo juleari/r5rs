@@ -102,3 +102,16 @@
 ((o f g) 1)
 ((o h) 1)
 ((o) 1)
+
+; 7
+(define (find-number a b c)
+  (if (<= a b)
+       (if (= 0 (remainder a c))
+           a
+           (find-number (+ 1 a) b c))
+       #f))
+
+;; tests
+(find-number 0 5 2)
+(find-number 7 9 3)
+(find-number 3 7 9)

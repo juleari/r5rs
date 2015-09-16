@@ -12,6 +12,9 @@
                (list '- p 1))))
     (eval x (interaction-environment))))
 
+(define (create-func-name name)
+  (string->symbol (string-append "derivative-" (symbol->string name))))
+
 (define (derivative-expt expr)
   (cons '* (cons (caddr expr) (list (list 'expt (cadr expr) (get-power (caddr expr)))))))
 
@@ -52,9 +55,6 @@
     (cons '* (append (list (func expr1))
                      (list (derivative-simple expr2)))))
   
-  (define (create-func-name name)
-    (string->symbol (string-append "derivative-" (symbol->string name))))
-  
   (define (derivative-base expr)
     (let ((func (create-func-name (car expr))))
       (if (list? (cadr expr))
@@ -63,21 +63,21 @@
   
   (define (derivative-simple expr)
     (let ((e (car expr)))
-      (if (number?    e)
+      (if (number? e)
           '(0)
           (case e
-            ('x '(1))
-            ('+ (cons '+ (derivative-list (cdr expr))))
-            ('- (cons '- (derivative-list (cdr expr))))
-            ('* (cons '+ (derivative-mul  '() (cadr expr) (cddr expr))))
-            ('/ (cons '/ (derivative-div (cadr expr) (caddr expr))))
+            ('x    '(1))
+            ('+    (cons '+ (derivative-list (cdr expr))))
+            ('-    (cons '- (derivative-list (cdr expr))))
+            ('*    (cons '+ (derivative-mul  '() (cadr expr) (cddr expr))))
+            ('/    (cons '/ (derivative-div (cadr expr) (caddr expr))))
             
             ('expt (cond ((and (list? (cadr expr))
                                (member 'x (my-flatten (cadr expr)))) (derivative-func derivative-expt expr (cadr expr)))
                          ((eqv? 'x (cadr expr))                      (derivative-expt expr))
                          ((list? (caddr expr))                       (derivative-func derivative-pow expr (caddr expr)))
                          (else                                       (derivative-pow expr))))
-            (else                                                    (derivative-base expr))))))
+            (else  (derivative-base expr))))))
   
   (derivative-simple expr))
 

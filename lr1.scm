@@ -34,9 +34,9 @@
 
 ; 4
 (define (cycle xs n)
-    (if (= 0 n)
-        '()
-        (append xs (cycle xs (- n 1)))))
+  (if (= 0 n)
+      '()
+      (append xs (cycle xs (- n 1)))))
 
 ;; tests
 (cycle '(0 1) 3)
@@ -103,10 +103,10 @@
 ; 7
 (define (find-number a b c)
   (if (<= a b)
-       (if (= 0 (remainder a c))
-           a
-           (find-number (+ 1 a) b c))
-       #f))
+      (if (= 0 (remainder a c))
+          a
+          (find-number (+ 1 a) b c))
+      #f))
 
 ;; tests
 (find-number 0 5 2)

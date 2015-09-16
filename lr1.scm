@@ -34,12 +34,9 @@
 
 ; 4
 (define (cycle xs n)
-  (define (helper n)
     (if (= 0 n)
         '()
-        (append xs (helper (- n 1)))))
-  
-  (helper n))
+        (append xs (cycle xs (- n 1)))))
 
 ;; tests
 (cycle '(0 1) 3)

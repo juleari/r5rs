@@ -1,15 +1,28 @@
+;(use-syntax (ice-9 syncase))
 (define (my-fold-right op xs)
   (if (= (length xs) 2)
       (op (car xs) (cadr xs))
       (op (car xs) (my-fold-right op (cdr xs)))))
 
 (define (make-vector-size sizes fill)
-  (define (helper xs size)
-    (if (= (length xs) size)
-        (list->vector (cons 'multi-vector (cons (length sizes) (append sizes xs))))
-        (helper (cons fill xs) size)))
+  (define (circle len xs)
+    (if (= 0 len)
+        '()
+        (append xs (circle (- len 1) xs))))
+
+  (define (make-list len)
+    (if (= 0 len)
+        '()
+        (cons fill (make-list (- len 1)))))
+
+  (define (helper sizes)
+    (if (null? (cdr sizes))
+      (make-list (car sizes))
+      (circle (car sizes) (helper (cdr sizes)))))
   
-  (helper '() (my-fold-right * sizes)))
+  (list->vector (cons 'multi-vector
+                      (cons (length sizes)
+                            (append sizes (helper sizes))))))
 
 (define-syntax make-multi-vector
   (syntax-rules ()
@@ -26,7 +39,10 @@
        (> (vector-length m) 2)
        (eqv? (vector-ref m 0) 'multi-vector)
        (> (vector-length m) (+ 2 (vector-ref m 1)))
-       (= (vector-length m) (+ 2 (vector-ref m 1) (take-mul (vector-ref m 1) (cddr (vector->list m)))))))
+       (= (vector-length m)
+          (+ 2
+             (vector-ref m 1)
+             (take-mul (vector-ref m 1) (cddr (vector->list m)))))))
 
 (define (take-lens m)
   (define (helper xs ms)
@@ -40,7 +56,8 @@
   (define (helper indx xs)
     (if (null? xs)
         (+ 2 (length indices) (car indx))
-        (+ (my-fold-right * (cons (car indx) xs)) (helper (cdr indx) (cdr xs)))))
+        (+ (my-fold-right * (cons (car indx) xs))
+           (helper (cdr indx) (cdr xs)))))
 
   (helper indices xs))
 
@@ -55,6 +72,7 @@
        (vector-set! m (get-index indices (cdr (take-lens m))) x)))
 
 ;; tests
+(define m (make-multi-vector '(11 11 11 11 11) 'x))
 (define m (make-multi-vector '(11 12 9 16)))
 (multi-vector? m)
 (multi-vector-set! m '(10 7 6 12) 'test)
@@ -81,3 +99,4 @@
 (multi-vector-set! m '(1 3 0) 14)
 (multi-vector-set! m '(1 3 1) 15)
 m
+(begin (define m (make-multi-vector (quote (11 12 9 16)))) (multi-vector? m))

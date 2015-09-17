@@ -18,9 +18,8 @@
     (list '*
           (list '+ a b)
           (list '+
-                (list '-
-                      (list 'expt a 2)
-                      (list '* a b))
+                (list 'expt a 2)
+                (cons '- (list (list '* a b)))
                 (list 'expt b 2))))
   
   (define (factorize-sub-sqr a b)

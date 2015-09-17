@@ -91,6 +91,12 @@
             ((car xs) (helper (cdr xs)))))
       (helper xs))))
 
+(define (o . procs)
+  (lambda (x)
+    (if (null? procs)
+      x
+      ((car procs) ((apply o (cdr procs)) x)))))
+
 ;; tests
 (define (f x) (* x 2))
 (define (g x) (* x 3))

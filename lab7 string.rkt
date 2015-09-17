@@ -10,7 +10,8 @@
   (list->string (trim-left (string->list str))))
 
 (define (string-trim-right str)
-  (list->string (reverse (string->list (string-trim-left (list->string (reverse (string->list str))))))))
+  (list->string
+   (reverse (string->list (string-trim-left (list->string (reverse (string->list str))))))))
 
 (define (string-trim str)
   (string-trim-left (string-trim-right str)))
@@ -18,10 +19,10 @@
 (define (string-prefix? a b)
   (let ((as (string->list a))
         (bs (string->list b)))
-    (cond ((null? as)               #t)
-          ((null? bs)               #f)
-          ((eqv? (car as) (car bs)) (string-prefix? (list->string (cdr as)) (list->string (cdr bs))))
-          (else                     #f))))
+    (or (null? as)
+        (and (not (null? bs))
+             (eqv? (car as) (car bs))
+             (string-prefix? (list->string (cdr as)) (list->string (cdr bs)))))))
 
 (define (string-suffix? a b)
   (string-prefix? (list->string (reverse (string->list a)))
@@ -29,9 +30,9 @@
 
 (define (string-infix? a b)
   (let ((bs (string->list b)))
-    (cond ((null? bs)           #f)
-          ((string-prefix? a b) #t)
-          (else                 (string-infix? a (list->string (cdr bs)))))))
+    (and (not (null? bs))
+         (or (string-prefix? a b)
+             (string-infix? a (list->string (cdr bs)))))))
 
 (define (string-split str sep)
   (define (trim-sep str len)
@@ -41,8 +42,10 @@
   
   (define (helper ss str)
     (cond ((null? (string->list str)) (list (list->string ss)))
-          ((string-prefix? sep str)   (cons (list->string ss) (helper '() (trim-sep str (string-length sep)))))
-          (else                       (helper (append ss (list (car (string->list str)))) (list->string (cdr (string->list str)))))))
+          ((string-prefix? sep str)   (cons (list->string ss)
+                                            (helper '() (trim-sep str (string-length sep)))))
+          (else                       (helper (append ss (list (car (string->list str))))
+                                              (list->string (cdr (string->list str)))))))
   
   (helper '() str))
 

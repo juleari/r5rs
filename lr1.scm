@@ -108,11 +108,9 @@
 
 ; 7
 (define (find-number a b c)
-  (if (<= a b)
-      (if (= 0 (remainder a c))
-          a
-          (find-number (+ 1 a) b c))
-      #f))
+  (and (<= a b)
+      (or (and (= 0 (remainder a c)) a)
+          (find-number (+ 1 a) b c))))
 
 ;; tests
 (find-number 0 5 2)

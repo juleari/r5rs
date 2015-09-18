@@ -16,10 +16,12 @@
   (string->symbol (string-append "derivative-" (symbol->string name))))
 
 (define (derivative-expt expr)
-  (cons '* (cons (caddr expr) (list (list 'expt (cadr expr) (get-power (caddr expr)))))))
+  (cons '* (cons (caddr expr)
+                 (list (list 'expt (cadr expr) (get-power (caddr expr)))))))
 
 (define (derivative-pow expr)
-  (cons '* (append (list (list 'expt (cadr expr) (caddr expr))) (list (list 'log (cadr expr))))))
+  (cons '* (append (list (list 'expt (cadr expr) (caddr expr)))
+                   (list (list 'log (cadr expr))))))
 
 (define (derivative-cos expr)
   (cons '- (list (list 'sin (cadr expr)))))
@@ -37,8 +39,10 @@
   
   (define (derivative-list es)
     (cond ((null? es)      '())
-          ((list? (car es)) (append (list (derivative-simple (car es))) (derivative-list (cdr es))))
-          (else             (append (derivative-simple (list (car es))) (derivative-list (cdr es))))))
+          ((list? (car es)) (append (list (derivative-simple (car es)))
+                                    (derivative-list (cdr es))))
+          (else             (append (derivative-simple (list (car es)))
+                                    (derivative-list (cdr es))))))
   
   (define (derivative-mul lx x xs)
     (let ((dx (if (list? x)
@@ -46,10 +50,12 @@
                   (derivative-simple (list x)))))
       (if (null? xs)
           (list (cons '* (append lx dx)))
-          (append (list (cons '* (append lx dx xs))) (derivative-mul (append lx (list x)) (car xs) (cdr xs))))))
+          (append (list (cons '* (append lx dx xs)))
+                  (derivative-mul (append lx (list x)) (car xs) (cdr xs))))))
   
   (define (derivative-div u v)
-    (append (list (cons '- (derivative-mul '() u (list v)))) (list (cons 'expt (list v 2)))))
+    (append (list (cons '- (derivative-mul '() u (list v))))
+            (list (cons 'expt (list v 2)))))
   
   (define (derivative-func func expr1 expr2)
     (cons '* (append (list (func expr1))
@@ -62,22 +68,26 @@
           (eval `(,func ',expr)(interaction-environment)))))
   
   (define (derivative-simple expr)
-    (let ((e (car expr)))
-      (if (number? e)
-          '(0)
-          (case e
-            ('x    '(1))
-            ('+    (cons '+ (derivative-list (cdr expr))))
-            ('-    (cons '- (derivative-list (cdr expr))))
-            ('*    (cons '+ (derivative-mul  '() (cadr expr) (cddr expr))))
-            ('/    (cons '/ (derivative-div (cadr expr) (caddr expr))))
-            
-            ('expt (cond ((and (list? (cadr expr))
-                               (member 'x (my-flatten (cadr expr)))) (derivative-func derivative-expt expr (cadr expr)))
-                         ((eqv? 'x (cadr expr))                      (derivative-expt expr))
-                         ((list? (caddr expr))                       (derivative-func derivative-pow expr (caddr expr)))
-                         (else                                       (derivative-pow expr))))
-            (else  (derivative-base expr))))))
+    (if (list? expr)
+        (let ((e (car expr)))
+          (if (number? e)
+              '(0)
+              (case e
+                ('x    '(1))
+                ('+    (cons '+ (derivative-list (cdr expr))))
+                ('-    (cons '- (derivative-list (cdr expr))))
+                ('*    (cons '+ (derivative-mul  '() (cadr expr) (cddr expr))))
+                ('/    (cons '/ (derivative-div (cadr expr) (caddr expr))))
+                
+                ('expt (if (or (and (list? (cadr expr))
+                                    (member 'x (my-flatten (cadr expr)))) 
+                               (eqv? 'x (cadr expr)))
+                           (derivative-base expr)
+                           (derivative-base (cons 'pow (cdr expr)))))
+                (else  (derivative-base expr)))))
+        (if (number? expr)
+            0
+            1)))
   
   (derivative-simple expr))
 

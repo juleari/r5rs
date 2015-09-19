@@ -44,29 +44,20 @@
 (cycle '() 0)
 
 ; 5
-(define and-fold
-  (lambda xs
-    (define (helper xs)
-      (or (null? xs)
-          (and (car xs)
-               (helper (cdr xs)))))
-    (helper xs)))
+(define (and-fold . xs)
+  (or (null? xs)
+      (and (car xs)
+           (apply and-fold (cdr xs)))))
 
-(define and-fold-cond
-  (lambda xs
-    (define (helper xs)
-      (cond ((null? xs)     #t)
-            ((not (car xs)) #f)
-            (else           (helper (cdr xs)))))
-    (helper xs)))
+(define (and-fold-cond . xs)
+  (cond ((null? xs)     #t)
+        ((not (car xs)) #f)
+        (else           (and-fold-cond (cdr xs)))))
 
-(define or-fold
-  (lambda xs
-    (define (helper xs)
-      (cond ((null? xs)     #f)
-            ((car xs)       #t)
-            (else           (helper (cdr xs)))))
-    (helper xs)))
+(define (or-fold . xs)
+  (cond ((null? xs) #f)
+        ((car   xs) #t)
+        (else       (apply or-fold (cdr xs)))))
 
 ;; tests
 (and-fold #f #f #f)
@@ -94,8 +85,8 @@
 (define (o . procs)
   (lambda (x)
     (if (null? procs)
-      x
-      ((car procs) ((apply o (cdr procs)) x)))))
+        x
+        ((car procs) ((apply o (cdr procs)) x)))))
 
 ;; tests
 (define (f x) (* x 2))
@@ -109,8 +100,8 @@
 ; 7
 (define (find-number a b c)
   (and (<= a b)
-      (or (and (= 0 (remainder a c)) a)
-          (find-number (+ 1 a) b c))))
+       (or (and (= 0 (remainder a c)) a)
+           (find-number (+ 1 a) b c))))
 
 ;; tests
 (find-number 0 5 2)

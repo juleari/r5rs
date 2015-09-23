@@ -1,12 +1,14 @@
-; polindrom?
-(define (polindrom? xs)
+; Написать процедуру (palindrom? xs), которая будет проверять является ли список палиндромом
+; (Палиндромом считается список, который с конца читается также как и сначала)
+(define (palindrom? xs)
   (equal? xs (reverse xs)))
 
-(polindrom? '((1 2 3) 1 (1 2 3))) ; #t
-(polindrom? '((1 2 3) 1 (3 2 1))) ; #f
+(palindrom? '((1 2 3) 1 (1 2 3))) ; #t
+(palindrom? '((1 2 3) 1 (3 2 1))) ; #f
 
-; polindrom-req1
-(define (polindrom-req? xs)
+; Написать процедуру (palindrom-req? xs), которая будет проверять является ли содержимое списка палиндромом
+; palindrom-req1
+(define (palindrom-req? xs)
   (define (helper xs ys)
     (or (and (null? xs)
              (null? ys))
@@ -19,8 +21,8 @@
              (helper (cdr xs) (cdr ys)))))
   (helper xs (reverse xs)))
 
-; polindrom-req2
-(define (polindrom-req? xs)
+; palindrom-req2
+(define (palindrom-req? xs)
   (define (my-flatten xs)
     (or (and (null? xs)
              '())
@@ -28,12 +30,13 @@
              (append (my-flatten (car xs)) (my-flatten (cdr xs))))
         (cons (car xs) (my-flatten (cdr xs)))))
 
-  (polindrom? (my-flatten xs)))
+  (palindrom? (my-flatten xs)))
 
-(polindrom-req? '((1 2 3) 1 (1 2 3))) ; #f
-(polindrom-req? '((1 2 3) 1 (3 2 1))) ; #t
+(palindrom-req? '((1 2 3) 1 (1 2 3))) ; #f
+(palindrom-req? '((1 2 3) 1 (3 2 1))) ; #t
 
-; count pred?
+; Написать процедуру (count pred? xs) которая будет возвращать количество элементов списка xs,
+; удовлетворяющих условию pred?
 (define (count pred? xs)
   (or (and (null? xs)
            0)
@@ -43,6 +46,7 @@
 
 (count odd? '(1 2 3 4 5 6 7)) ; 4
 
+; Написать процедуру add, которая будет складывать произвольное количество элементов.
 ; add1
 (define (add . xs)
   (or (and (null? xs)

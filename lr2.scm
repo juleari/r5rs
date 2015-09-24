@@ -29,7 +29,7 @@
         (and (list? (car xs))
              (append (my-flatten (car xs)) (my-flatten (cdr xs))))
         (cons (car xs) (my-flatten (cdr xs)))))
-
+  
   (palindrom? (my-flatten xs)))
 
 (palindrom-req? '((1 2 3) 1 (1 2 3))) ; #f
@@ -49,8 +49,8 @@
 ; Написать процедуру add, которая будет складывать произвольное количество элементов.
 ; add1
 (define (add . xs)
-  (or (and (null? xs)
-           0)
+  (if (null? xs)
+      0
       (+ (car xs) (apply add (cdr xs)))))
 
 ; add2
@@ -59,3 +59,39 @@
 
 (add)           ; 0
 (add 1 4 6 2 8) ; 21
+
+; Написать процедуру (polynom as x), которая будет вычислять значение полинома (a0*x^n + ... + an)
+; polynom1
+(define (polynom as x)
+  (define (helper as n)
+    (if (null? as)
+        0
+        (+ (* (car as) (expt x n))
+           (helper (cdr as) (+ 1 n)))))
+  
+  (helper as 0))
+
+; polynom2
+(define (polynom as x)
+  (define (helper as y)
+    (if (null? as)
+        0
+        (+ (* (car as) y)
+           (helper (cdr as) (* y x)))))
+  
+  (if (null? as)
+      0
+      (helper as 1)))
+
+; polynom3
+(define (polynom as x)
+  (define (helper as sum)
+    (if (null? as)
+        sum
+        (helper (cdr as)
+                 (+ (* sum x)
+                    (car as)))))
+  (helper (reverse as) 0))
+
+(polynom '(3 2) 10)
+(polynom '(-4 1 -5 2 3) 2)

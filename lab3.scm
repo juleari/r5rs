@@ -29,19 +29,7 @@
 (map 1/x '(-2 -1 0 1 2))
 (write (map 1/x '(1 2 3 4 5)))
 
-
-(define x* '())
-
 ;#2
-(define-syntax &*
-  (syntax-rules (->)
-    ((_ args -> body ...) (lambda args (begin body ...)))
-    ((_ args arg . other) (&* (append args (list arg)) . other))))
-
-(define-syntax &
-  (syntax-rules ()
-    ((_ . other)          (&* x* . other))))
-
 (define-syntax &
   (syntax-rules (->)
     ((_ -> body ...)     (lambda () (begin body ...)))

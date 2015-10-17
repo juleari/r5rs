@@ -32,6 +32,7 @@
 
 (define x* '())
 
+;#2
 (define-syntax &*
   (syntax-rules (->)
     ((_ args -> body ...) (lambda args (begin body ...)))

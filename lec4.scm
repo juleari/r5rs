@@ -18,7 +18,7 @@
       (lazy-ref (lazy-cdr ls) (- n 1))))
 
 #|
-import-port?
+input-port?
 output-port?
 
 (current-input-port)
@@ -30,12 +30,12 @@ output-port?
 (read)
 (read port)
 (read-char [port])
-(pack-char [port])
+(peek-char [port])
 (eof-object?)
 (char-ready? port)
 
 (write x port)
-(display x post)
+(display x port)
 (newline)
 
 with-input-to-file

@@ -1,0 +1,10 @@
+(define-syntax ref
+  (syntax-rules ()
+    ((_ xs index elem)
+     (and (not (null? xs))
+          (or (and (zero? index) (cons elem (cdr xs)))
+              (ref (cdr xs) (- index 1) elem))))
+    ((_ xs index)
+     (and (not (null? xs))
+          (or (and (zero? index) (car xs))
+              (ref (cdr xs) (- index 1)))))))

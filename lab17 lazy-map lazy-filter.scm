@@ -1,3 +1,5 @@
+;(use-syntax (ice-9 syncase))
+
 (define-syntax lazy-cons
   (syntax-rules ()
     ((_ a b) (cons a (delay b)))))
@@ -27,7 +29,7 @@
         (lazy-cons x (lazy-filter pred? (lazy-cdr xs)))
         (lazy-filter pred? (lazy-cdr xs)))))
 
-#| tests
+#| ;; tests
 (lazy-head naturals 10)
 (lazy-head (lazy-map (lambda (x) (- x)) naturals) 10)
 (lazy-head (lazy-map * naturals naturals) 10)

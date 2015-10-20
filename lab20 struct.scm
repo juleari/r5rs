@@ -1,8 +1,12 @@
 (define (make-fields% cols pairs)
   (if (null? cols)
       (reverse pairs)
-      (let ((col (car cols)))
-        (make-fields% (cdr cols) (cons `(',col ,col) pairs)))))
+      (let* ((col  (car cols))
+             (colb `,col))
+        (make-fields% (cdr cols) (cons `(,col ,colb) pairs)))))
+
+(define (fill-fields% name cols pairs)
+  (write 1))
 
 (define (define-make% name cols)
   (let* ((mname (string->symbol (string-append "make-" (symbol->string name))))

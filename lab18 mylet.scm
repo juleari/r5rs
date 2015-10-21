@@ -1,4 +1,4 @@
-;(use-syntax (ice9-syncase))
+;(use-syntax (ice-9 syncase))
 
 (define-syntax my-let
   (syntax-rules ()

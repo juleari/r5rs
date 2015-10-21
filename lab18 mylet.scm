@@ -19,9 +19,9 @@
     ((_ ((k1 v1)) body ...)             ((lambda (k1) body ...) v1))
     ((_ ((k1 v1) (k2 v2) ...) body ...) ((lambda (k1) (my-let ((k2 v2) ...) body ...)) v1))))
 
-(my-let ((a 1)(b (+ 7 2)) (- a b)(+ a b)))
+(my-let ((a 1)(b (+ 7 2))) (- a b)(+ a b))
 
-#|(define-syntax my-let*
+(define-syntax my-let*
   (syntax-rules ()
     ((_ ((k1 v1)) body ...)             ((lambda (k1) body ...) v1))
-    ((_ ((k1 v1) (k2 v2) ...) body ...) ((lambda (k1) (my-let* ((k2 v2) ...) body ...)) v1))))|#
+    ((_ ((k1 v1) (k2 v2) ...) body ...) ((lambda (k1) (my-let* ((k2 v2) ...) body ...)) v1))))

@@ -1,13 +1,11 @@
 ;(use-syntax (ice-9 syncase))
 
 (define (concat-symbols a . b)
-  (define (helper x xs)
-    (if (null? xs)
-        x
-        (helper (string->symbol (string-append (symbol->string x)
-                                               (symbol->string (car xs))))
-                (cdr xs))))
-  (helper a b))
+  (if (null? b)
+        a
+        (apply concat-symbols (cons (string->symbol (string-append (symbol->string a)
+                                               (symbol->string (car b))))
+                                    (cdr b)))))
 
 (define (set-assoc! alist key value)
   (if (null? alist)
@@ -19,7 +17,8 @@
 
 (define (define-make% name cols)
   (let* ((mname (concat-symbols 'make- name)))
-    (eval `(define (,mname . vals) (map (lambda (col val) `(,col ,val)) ',cols vals))
+    (eval `(define (,mname . vals) (cons ',name
+                                         (list (map (lambda (col val) `(,col ,val)) ',cols vals))))
           (interaction-environment))))
 
 (define (fields% p f)
@@ -35,14 +34,15 @@
   (let* ((pname (concat-symbols name '?))
          (pdef  (list pname 'p)))
     (eval `(define ,pdef (and (list? p)
-                              (fields% p ',cols)))
+                              (eq? (car p) ',name)
+                              (fields% (cadr p) ',cols)))
           (interaction-environment))))
 
 (define (define-gets% name cols)
   (map (lambda (col)
          (let* ((gname (concat-symbols name '- col))
                 (gdef  (list gname 'p)))
-           (eval `(define ,gdef (cadr (assoc ',col p)))
+           (eval `(define ,gdef (cadr (assoc ',col (cadr p))))
                  (interaction-environment))))
        cols))
 
@@ -52,7 +52,7 @@
                 (sdef  (list sname 'p 'v)))
            (eval `(define-syntax ,sname
                     (syntax-rules ()
-                      ((_ p v) (set! p (set-assoc! p ',col v)))))
+                      ((_ p v) (set! p (cons (car p) (list (set-assoc! (cadr p) ',col v)))))))
                  (interaction-environment))))
        cols))
 
@@ -67,7 +67,7 @@
     ((_ name cols) (define-struct% (quote name) (quote cols)))))
 
 ;; tests
-#|(define-struct tr (col1 col2))
+(define-struct tr (col1 col2))
 (define t (make-tr 1 2))
 (tr? t)
 
@@ -83,4 +83,4 @@
 (set-pos-col! p 4)
 
 (pos-row p)
-(pos-col p)|#
+(pos-col p)

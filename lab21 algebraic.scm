@@ -44,7 +44,7 @@
 
 (define-syntax match
   (syntax-rules()
-    ((_ p) (display "no matches\n"))
+    ((_ p) #f)
     ((_ p ((type1 a1 ...) (body1 ...)) ((type2 a2 ...) (body2 ...)) ...)
      (if (equal? (quote (type1 a1 ...)) (cadr p))
          (let ((cp (cdadr p))
@@ -53,34 +53,7 @@
          (match p ((type2 a2 ...) (body2 ...)) ...)))))
 
 ;; tests
-#|(define-data figure ((square a)
-                     (rectangle a b)
-                     (triangle a b c)
-                     (circle r)))
-
-(define s (square 10))
-(define r (rectangle 10 20))
-(define t (triangle 10 20 30))
-(define c (circle 10))
-
-(and (figure? s)
-     (figure? r)
-     (figure? t)
-     (figure? c))
-
-(define pi (acos -1)) ; Для окружности
-
-(define (perim f)
-  (match f 
-    ((square a)       (* 4 a))
-    ((rectangle a b)  (* 2 (+ a b)))
-    ((triangle a b c) (+ a b c))
-    ((circle r)       (* 2 pi r))))
-
-(perim s)
-(perim r)
-(perim t)
-
+#|
 (begin
   (define-data figure ((square a)
                        (rectangle a b)

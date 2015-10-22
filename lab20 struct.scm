@@ -67,7 +67,7 @@
     ((_ name cols) (define-struct% (quote name) (quote cols)))))
 
 ;; tests
-(define-struct tr (col1 col2))
+#|(define-struct tr (col1 col2))
 (define t (make-tr 1 2))
 (tr? t)
 
@@ -83,4 +83,4 @@
 (set-pos-col! p 4)
 
 (pos-row p)
-(pos-col p)
+(pos-col p)|#

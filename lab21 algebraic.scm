@@ -1,4 +1,4 @@
-(use-syntax (ice-9 syncase))
+;(use-syntax (ice-9 syncase))
 
 (define (define-make% name cases)
   (map (lambda (case)
@@ -16,11 +16,6 @@
        (or (equal? p (car cases))
            (type?  p (cdr cases)))))
 
-(define (len xs)
-  (if (null? xs)
-      0
-      (+ 1 (len (cdr xs)))))
-
 (define (define-pred% name cases)
   (let ((pname (string->symbol
                 (string-append (symbol->string name)
@@ -34,41 +29,28 @@
                   (type? (cadr p) ',cases)
                   (not (null? (cddr p)))
                   (list? (caddr p))
-                  (eq? (len (cdadr p)) (len (caddr p)))
+                  (eq? (length (cdadr p)) (length (caddr p)))
                   (null? (cdddr p))))
           (interaction-environment))))
 
-(define (define-match% name cases)
-  (eval `(define-syntax match
-           (syntax-rules ()
-             ((_ p) (write p))
-             ((_ p ((type1 a1 ...) (body1 ...)) ((type2 a2 ...) (body2 ...)) ...)
-              (begin
-                (if (equal? (quote (type1 a1 ...)) (cadr p))
-                    (let ((cp (cdadr p))
-                          (ap (caddr p)))
-                      (apply (eval `(lambda ,cp (body1 ...))(interaction-environment)) ap))
-                    (match p ((type2 a2 ...) (body2 ...)) ...))))))
-        (interaction-environment)))
-
-(define (define-match% name cases)
-  (eval `(define (match p . conds)
-           ((if (equal? (cadr p) (caar conds))
-                    (let ((cp (cdadr p))
-                          (ap (caddr p)))
-                      (apply (eval `(lambda ,cp . (cdar conds))(interaction-environment)) ap))
-                    (apply match (cons p (cdr conds))))))
-        (interaction-environment)))
-
 (define (define-data% name cases)
   (define-make%  name cases)
-  (define-pred%  name cases)
-  (define-match% name cases))
+  (define-pred%  name cases))
 
 (define-syntax define-data
   (syntax-rules ()
     ((_ name ((case a ...) ...))
      (define-data% (quote name) (quote ((case a ...) ...))))))
+
+(define-syntax match
+  (syntax-rules()
+    ((_ p) (display "no matches\n"))
+    ((_ p ((type1 a1 ...) (body1 ...)) ((type2 a2 ...) (body2 ...)) ...)
+     (if (equal? (quote (type1 a1 ...)) (cadr p))
+         (let ((cp (cdadr p))
+               (ap (caddr p)))
+           (apply (eval `(lambda ,cp (body1 ...))(interaction-environment)) ap))
+         (match p ((type2 a2 ...) (body2 ...)) ...)))))
 
 ;; tests
 #|(define-data figure ((square a)
@@ -97,4 +79,43 @@
 
 (perim s)
 (perim r)
-(perim t)|#
+(perim t)
+
+(begin
+  (define-data figure ((square a)
+                       (rectangle a b)
+                       (triangle a b c)
+                       (circle r)))
+  
+  (define s (square 10))
+  (define r (rectangle 10 20))
+  (define t (triangle 10 20 30))
+  (define c (circle 10))
+  
+  (define test-1 (and (figure? s)
+                      (figure? r)
+                      (figure? t)
+                      (figure? c)))
+  
+  (define a '(circle 0 0 1))
+  (define b #f)
+  
+  (define test-2 (and (figure? a)
+                      (figure? b)))
+  
+  (define pi (acos -1))
+  
+  (define (perim f)
+    (match f 
+      ((square a)       (* 4 a))
+      ((rectangle a b)  (* 2 (+ a b)))
+      ((triangle a b c) (+ a b c))
+      ((circle r)       (* 2 pi r))))
+  
+  (list test-1
+        test-2
+        (perim s)
+        (perim r)
+        (perim t)
+        (round (perim c)))
+  )|#

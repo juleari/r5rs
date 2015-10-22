@@ -1,20 +1,26 @@
-(define (make-fields% cols pairs)
-  (if (null? cols)
-      (reverse pairs)
-      (let* ((col  (car cols))
-             (colb `,col))
-        (make-fields% (cdr cols) (cons `(,col ,colb) pairs)))))
+;(use-syntax (ice-9 syncase))
 
-(define (fill-fields% name cols pairs)
-  (write 1))
+(define (concat-symbols a . b)
+  (define (helper x xs)
+    (if (null? xs)
+        x
+        (helper (string->symbol (string-append (symbol->string x)
+                                               (symbol->string (car xs))))
+                (cdr xs))))
+  (helper a b))
+
+(define (set-assoc! alist key value)
+  (if (null? alist)
+      (list (list key value))
+      (let ((a (car alist)))
+        (if (equal? (car a) key)
+            (cons (list key value) (cdr alist))
+            (cons a (set-assoc! (cdr alist) key value))))))
 
 (define (define-make% name cols)
-  (let* ((mname (string->symbol (string-append "make-" (symbol->string name))))
-         (mdef  (cons mname cols))
-         (mbody `(vector ',name ',(make-fields% cols '()))))
-    (write `(define ,mdef ,mbody))
-    (eval `(define ,mdef ,mbody)(interaction-environment))))
-
+  (let* ((mname (concat-symbols 'make- name)))
+    (eval `(define (,mname . vals) (map (lambda (col val) `(,col ,val)) ',cols vals))
+          (interaction-environment))))
 
 (define (fields% p f)
   (or (and (null? p)
@@ -25,70 +31,56 @@
            (eq? (caar p) (car f))
            (fields% (cdr p) (cdr f)))))
 
-(define (check? p cols)
-  (and (not (null? p))
-       (eq? 'pos (car p))
-       (fields% (cdr p) cols)))
-
 (define (define-pred% name cols)
-  
-  (let* ((pname (string->symbol (string-append (symbol->string name) "?")))
+  (let* ((pname (concat-symbols name '?))
          (pdef  (list pname 'p)))
-    (eval `(define ,pdef (and (vector? p)
-                              (check? (vector->list p) ',cols)))
+    (eval `(define ,pdef (and (list? p)
+                              (fields% p ',cols)))
           (interaction-environment))))
 
-(define (define-gets% name cols) 1)
-(define (define-sets% name cols) 1)
+(define (define-gets% name cols)
+  (map (lambda (col)
+         (let* ((gname (concat-symbols name '- col))
+                (gdef  (list gname 'p)))
+           (eval `(define ,gdef (cadr (assoc ',col p)))
+                 (interaction-environment))))
+       cols))
+
+(define (define-sets% name cols)
+  (map (lambda (col)
+         (let* ((sname (concat-symbols 'set- name '- col '!))
+                (sdef  (list sname 'p 'v)))
+           (eval `(define-syntax ,sname
+                    (syntax-rules ()
+                      ((_ p v) (set! p (set-assoc! p ',col v)))))
+                 (interaction-environment))))
+       cols))
 
 (define (define-struct% name cols)
-  (define-make% name cols)
-  (define-pred% name cols)
+  (define-sets% name cols)
   (define-gets% name cols)
-  (define-sets% name cols))
+  (define-pred% name cols)
+  (define-make% name cols))
 
 (define-syntax define-struct
   (syntax-rules ()
     ((_ name cols) (define-struct% (quote name) (quote cols)))))
 
 ;; tests
-(define-struct tr (col1 col2))
-;(define t (make-tr 1 2))
-;(tr? t)
+#|(define-struct tr (col1 col2))
+(define t (make-tr 1 2))
+(tr? t)
 
+(define-struct pos (row col))
 
+(define p (make-pos 1 2))
+(pos? p)
 
-(define (make-pos row col)
-  (vector 'pos `((row ,row) (col ,col))))
+(pos-row p)
+(pos-col p)
 
-(define (fields p f)
-  (or (and (null? p)
-           (null? f))
-      (and (not (null? p))
-           (not (null? f))
-           (not (null? (car p)))
-           (eq? (caar p) (car f))
-           (fields (cdr p) (cdr f)))))
+(set-pos-row! p 3)
+(set-pos-col! p 4)
 
-(define (check? p)
-  (and (not (null? p))
-       (eq? 'pos (car p))
-       (fields (cdr p) '(row col))))
-
-(define (pos? p)
-  (and (vector? p)
-       (check? (vector->list p))))
-
-(define (pos-row p)
-  (cadr (assq 'row (cdr (vector->list p)))))
-
-(define (pos-col p)
-  (cadr (assq 'col (cdr (vector->list p)))))
-
-;(define (set-pos-row! p v)
-;  (set! ()))
-
-;(define p (make-pos 1 2))
-;(pos? p)
-;(pos-row p)
-;(pos-col p)
+(pos-row p)
+(pos-col p)|#

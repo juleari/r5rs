@@ -48,8 +48,7 @@
 
 (define (define-sets% name cols)
   (map (lambda (col)
-         (let* ((sname (concat-symbols 'set- name '- col '!))
-                (sdef  (list sname 'p 'v)))
+         (let ((sname (concat-symbols 'set- name '- col '!)))
            (eval `(define-syntax ,sname
                     (syntax-rules ()
                       ((_ p v) (set! p (cons (car p) (list (set-assoc! (cadr p) ',col v)))))))

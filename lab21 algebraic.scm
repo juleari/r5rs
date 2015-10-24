@@ -10,7 +10,6 @@
                           cvals))
                  (interaction-environment)))) cases))
 
-
 (define (type? p cases)
   (and (not (null? cases))
        (or (equal? p (car cases))

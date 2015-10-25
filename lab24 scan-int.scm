@@ -1,5 +1,5 @@
-;; digit   :== [0-9]
-;; integer :== [+-]? digit+
+;; digit   ::= [0-9]
+;; integer ::= [+-]? digit+
 
 (define (check-integer str)
   (and (scan-integer str) (string? str)))

@@ -38,7 +38,9 @@
                        (evaluate (remove-from-list 0 ex) 0)
                        ex))
                (if (member 'x (my-flatten ex))
-                   ex
+                   (if (and (or (eq? op '+) (eq? op '-)) (eq? 2 (length ex)))
+                       (cadr ex)
+                       ex)
                    (eval ex (interaction-environment))))))
         (else (eval expr (interaction-environment)))))
 

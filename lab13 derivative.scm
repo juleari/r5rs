@@ -12,6 +12,18 @@
                (list '- p 1))))
     (eval x (interaction-environment))))
 
+(define (evaluate expr neutral)
+  (cond ((not (list? expr)) expr)
+        ((null? expr) neutral)
+        ((member 'x (my-flatten (cdr expr)))
+         (let* ((op  (car expr))
+                (net (if (or (eq? op '*) (eq? op '/))
+                         1
+                         0)))
+           (append (list (car expr))
+                             (map (lambda (e) (apply evaluate (list e net))) (cdr expr)))))
+        (else (eval expr (interaction-environment)))))
+
 (define (create-func-name name)
   (string->symbol (string-append "derivative-" (symbol->string name))))
 
@@ -89,11 +101,11 @@
             0
             1)))
   
-  (derivative-simple expr))
+  (evaluate (derivative-simple expr) 0))
 
 ;; tests
-(derivative '(2))
-(derivative '(x))
+(derivative '2)
+(derivative 'x)
 (derivative '(- x))
 (derivative '(* 1 x))
 (derivative '(- (* 1 x)))

@@ -12,6 +12,15 @@
                (list '- p 1))))
     (eval x (interaction-environment))))
 
+(define (remove-from-list x xs)
+  (if (null? xs)
+      '()
+      (let ((c (car xs))
+            (s (remove-from-list x (cdr xs))))
+        (if (equal? x c)
+            s
+            (cons (car xs) s)))))
+
 (define (evaluate expr neutral)
   (cond ((not (list? expr)) expr)
         ((null? expr) neutral)
@@ -19,9 +28,18 @@
          (let* ((op  (car expr))
                 (net (if (or (eq? op '*) (eq? op '/))
                          1
-                         0)))
-           (append (list (car expr))
-                             (map (lambda (e) (apply evaluate (list e net))) (cdr expr)))))
+                         0))
+                (ex (append (list (car expr))
+                            (map (lambda (e) (apply evaluate (list e net))) (cdr expr)))))
+           (if (member 0 ex)
+               (if (or (eq? op '*) (eq? op '/))
+                   0
+                   (if (or (eq? op '+) (eq? op '-))
+                       (evaluate (remove-from-list 0 ex) 0)
+                       ex))
+               (if (member 'x (my-flatten ex))
+                   ex
+                   (eval ex (interaction-environment))))))
         (else (eval expr (interaction-environment)))))
 
 (define (create-func-name name)

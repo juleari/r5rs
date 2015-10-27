@@ -34,7 +34,7 @@
            (if (member 0 ex)
                (if (or (eq? op '*) (eq? op '/))
                    0
-                   (if (or (eq? op '+) (eq? op '-))
+                   (if (eq? op '+)
                        (evaluate (remove-from-list 0 ex) 0)
                        ex))
                (if (member 'x (my-flatten ex))

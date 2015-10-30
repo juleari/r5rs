@@ -116,4 +116,4 @@
 (tokenize "1")
 (tokenize "-a")
 (tokenize "-a + b * x^2 + dy")
-(tokenize "as1 + as^1232 * (1 - 5)/9")
+(tokenize "as1fff + as^1232ewf * (1 - 5)/9")

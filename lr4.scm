@@ -1,9 +1,14 @@
 (define (interpret program stack)
   (define (op? x)
-    (or (eq? x '+) (eq? x '-) (eq? x '*) (eq? x '/) (eq? x 'or) (eq? x 'and)))
-
+    (or (eq? x '+) (eq? x '-) (eq? x '*) (eq? x 'or) (eq? x 'and)))
+  
   (define (comp? x)
     (or (eq? x '=) (eq? x '<) (eq? x '>)))
+  
+  (define (find-end i end)
+    (if (eq? (vector-ref program i) end)
+        (+ i 1)
+        (find-end (+ i 1) end)))
   
   (define (scan i stack return dict)
     (if (eq? i (vector-length program))
@@ -12,22 +17,13 @@
                (func (assoc word dict)))
                 ;; Выполнение программы ;;
           (cond (func (scan (cadr func) stack (cons (+ i 1) return) dict))
-                ;; Число на стек ;;
                 ((number? word) (scan (+ 1 i) (cons word stack) return dict))
                 ;; Управляющие конструкции ;;
-                ((eq? word 'define) (let loop ((ind (+ 2 i)))
-                                      (if (eq? (vector-ref program ind) 'end)
-                                          (scan (+ 1 ind) stack return
-                                                (cons (list (vector-ref program (+ 1 i)) (+ 2 i))
-                                                      dict))
-                                          (loop (+ 1 ind)))))
-                ((eq? word 'end) (scan (car return) stack (cdr return) dict))
-                ((eq? word 'exit) (scan (car return) stack (cdr return) dict))
+                ((eq? word 'define) (scan (find-end i 'end) stack return
+                                          (cons (list (vector-ref program (+ 1 i)) (+ 2 i)) dict)))
+                ((or (eq? word 'end) (eq? word 'exit)) (scan (car return) stack (cdr return) dict))
                 ((eq? word 'if) (if (zero? (car stack))
-                                    (let loop ((ind (+ 1 i)))
-                                      (if (eq? (vector-ref program ind) 'endif)
-                                          (scan (+ 1 ind) (cdr stack) return dict)
-                                          (loop (+ 1 ind))))
+                                    (scan (find-end i 'endif) (cdr stack) return dict)
                                     (scan (+ 1 i) (cdr stack) return dict)))
                 ((eq? word 'endif) (scan (+ 1 i) stack return dict))
                 ;; Операции с числами ;;
@@ -36,17 +32,18 @@
                                                (cddr (list ,@stack)))
                                         (interaction-environment))
                                   return dict))
+                ((eq? word '/) (scan (+ 1 i)
+                                       (cons (quotient (cadr stack) (car stack)) (cddr stack))
+                                       return dict))
                 ((eq? word 'mod) (scan (+ 1 i)
                                        (cons (remainder (cadr stack) (car stack)) (cddr stack))
                                        return dict))
                 ((eq? word 'neg) (scan (+ 1 i) (cons (- (car stack)) (cdr stack)) return dict))
                 ((comp? word) (scan (+ 1 i) 
-                                  (eval `(cons (if (,word (cadr (list ,@stack))
-                                                        (car (list ,@stack))) -1 0)
-                                               (cddr (list ,@stack)))
-                                        (interaction-environment))
-                                  return
-                                  dict))
+                                    (eval `(cons (if (,word (cadr (list ,@stack))
+                                                            (car (list ,@stack))) -1 0)
+                                                 (cddr (list ,@stack)))
+                                          (interaction-environment)) return dict))
                 ((eq? word 'not) (scan (+ 1 i) (cons (not (car stack)) (cdr stack)) return dict))
                 ;; Операции со стеком ;;
                 ((eq? word 'drop) (scan (+ 1 i) (cdr stack) return dict))

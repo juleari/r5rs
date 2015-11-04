@@ -1,75 +1,30 @@
-;(use-syntax (ice-9 syncase))
-(define (my-fold-right op xs)
-  (if (= (length xs) 2)
-      (op (car xs) (cadr xs))
-      (op (car xs) (my-fold-right op (cdr xs)))))
+(define (calc-length sizes)
+  (+ 1 (apply * sizes)))
 
-(define (make-vector-size sizes fill)
-  (define (circle len xs)
-    (if (= 0 len)
-        '()
-        (append xs (circle (- len 1) xs))))
-
-  (define (make-list len)
-    (if (= 0 len)
-        '()
-        (cons fill (make-list (- len 1)))))
-
-  (define (helper sizes)
-    (if (null? (cdr sizes))
-      (make-list (car sizes))
-      (circle (car sizes) (helper (cdr sizes)))))
-  
-  (list->vector (cons 'multi-vector
-                      (cons (length sizes)
-                            (append sizes (helper sizes))))))
-
-(define-syntax make-multi-vector
-  (syntax-rules ()
-    ((_ sizes)      (make-vector-size sizes 0))
-    ((_ sizes fill) (make-vector-size sizes fill))))
+(define (make-multi-vector . args)
+  (write args)
+  (let* ((sizes (car args))
+         (vect  (apply make-vector
+                       (cons (calc-length sizes) (cdr args)))))
+    (vector-set! vect 0 sizes)
+    vect))
 
 (define (multi-vector? m)
-  (define (take-mul num xs)
-    (if (= 0 num)
-        1
-        (* (car xs) (take-mul (- num 1) (cdr xs)))))
-  
   (and (vector? m)
-       (> (vector-length m) 2)
-       (eqv? (vector-ref m 0) 'multi-vector)
-       (> (vector-length m) (+ 2 (vector-ref m 1)))
-       (= (vector-length m)
-          (+ 2
-             (vector-ref m 1)
-             (take-mul (vector-ref m 1) (cddr (vector->list m)))))))
+       (list? (vector-ref m 0))
+       (eq? (vector-length m) (calc-length (vector-ref m 0)))))
 
-(define (take-lens m)
-  (define (helper xs ms)
-    (if (= (length xs) (vector-ref m 1))
-        xs
-        (helper (append xs (list (car ms))) (cdr ms))))
-
-  (helper '() (cddr (vector->list m))))
-
-(define (get-index indices xs)
-  (define (helper indx xs)
-    (if (null? xs)
-        (+ 2 (length indices) (car indx))
-        (+ (my-fold-right * (cons (car indx) xs))
-           (helper (cdr indx) (cdr xs)))))
-
-  (helper indices xs))
+(define (get-index sizes indices)
+  (if (null? sizes)
+      (+ 1 (car indices))
+      (+ (apply * (cons (car indices) sizes))
+         (get-index (cdr sizes) (cdr indices)))))
 
 (define (multi-vector-ref m indices)
-  (and (multi-vector? m)
-       (= (length indices) (vector-ref m 1))
-       (vector-ref m (get-index indices (cdr (take-lens m))))))
+  (vector-ref m (get-index (cdr (vector-ref m 0)) indices)))
 
 (define (multi-vector-set! m indices x)
-  (and (multi-vector? m)
-       (= (length indices) (vector-ref m 1))
-       (vector-set! m (get-index indices (cdr (take-lens m))) x)))
+  (vector-set! m (get-index (cdr (vector-ref m 0)) indices) x))
 
 ;; tests
 (define m (make-multi-vector '(11 11 11 11 11) 'x))

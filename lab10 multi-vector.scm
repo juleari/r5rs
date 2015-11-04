@@ -2,7 +2,6 @@
   (+ 1 (apply * sizes)))
 
 (define (make-multi-vector . args)
-  (write args)
   (let* ((sizes (car args))
          (vect  (apply make-vector
                        (cons (calc-length sizes) (cdr args)))))

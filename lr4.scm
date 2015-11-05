@@ -54,7 +54,7 @@
                 ((eq? word 'rot)  (scan (+ 1 i) (append (list (caddr stack) (cadr stack) (car stack))
                                                         (cdddr stack)) return dict))
                 ((eq? word 'depth) (scan (+ 1 i) (cons (length stack) stack) return dict))))))
-  (scan 0 stack '() '((#f #f))))
+  (scan 0 stack '() '()))
 
 ;; tests
 #|(interpret #(define abs

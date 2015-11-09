@@ -56,7 +56,7 @@
                    (list (list 'log (cadr expr))))))
 
 (define (derivative-cos expr)
-  (cons '- (list (list 'sin (cadr expr)))))
+  (list '- (list 'sin (cadr expr))))
 
 (define (derivative-sin expr)
   (list 'cos (cadr expr)))

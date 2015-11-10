@@ -1,12 +1,7 @@
 ;(use-syntax (ice-9 syncase))
 
-(define (concat-symbols a . b)
-  (if (null? b)
-      a
-      (apply concat-symbols (cons (string->symbol
-                                   (string-append (symbol->string a)
-                                                  (symbol->string (car b))))
-                                  (cdr b)))))
+(define (concat-symbols . a)
+  (string->symbol (apply string-append (map symbol->string a))))
 
 (define (ids i cols)
   (if (null? cols)

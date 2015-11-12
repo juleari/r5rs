@@ -2,12 +2,9 @@
 
 (define (define-make% name cases)
   (map (lambda (case)
-         (let ((cname (car case))
-               (cargs (cdr case)))
-           (eval `(define (,cname . cvals)
-                    (list ',name
-                          ',case
-                          cvals))
+         (let ((cargs (cdr case)))
+           (eval `(define ,case
+                    (list ',name ',case ,@(cdr case)))
                  (interaction-environment)))) cases))
 
 (define (type? p cases)
@@ -47,13 +44,13 @@
     ((_ p ((type1 a1 ...) (body1 ...)) ((type2 a2 ...) (body2 ...)) ...)
      (if (equal? (quote (type1 a1 ...)) (cadr p))
          (let ((cp (cdadr p))
-               (ap (caddr p)))
+               (ap (cddr p)))
            (apply (eval `(lambda ,cp (body1 ...))(interaction-environment)) ap))
          (match p ((type2 a2 ...) (body2 ...)) ...)))))
 
 ;; tests
-#|
-(begin
+
+#|(begin
   (define-data figure ((square a)
                        (rectangle a b)
                        (triangle a b c)

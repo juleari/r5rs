@@ -2,10 +2,9 @@
 
 (define (define-make% name cases)
   (map (lambda (case)
-         (let ((cargs (cdr case)))
-           (eval `(define ,case
-                    (list ',name ',case ,@(cdr case)))
-                 (interaction-environment)))) cases))
+         (eval `(define ,case
+                  (list ',name ',case ,@(cdr case)))
+               (interaction-environment))) cases))
 
 (define (type? p cases)
   (and (not (null? cases))

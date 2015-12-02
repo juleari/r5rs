@@ -1,50 +1,38 @@
 ;(use-syntax (ice-9 syncase))
 
-(define (define-make% name cases)
-  (map (lambda (case)
-         (eval `(define ,case
-                  (list ',name ',case ,@(cdr case)))
-               (interaction-environment))) cases))
-
-(define (type? p cases)
-  (and (not (null? cases))
-       (or (equal? p (car cases))
-           (type?  p (cdr cases)))))
-
-(define (define-pred% name cases)
-  (let ((pname (string->symbol
-                (string-append (symbol->string name)
-                               "?"))))
-    (eval `(define (,pname p)
-             (and (list?  p)
-                  (not (null? p))
-                  (equal? (car p) ',name)
-                  (not (null? (cdr p)))
-                  (list? (cadr p))
-                  (type? (cadr p) ',cases)
-                  (not (null? (cddr p)))
-                  (list? (caddr p))
-                  (eq? (length (cdadr p)) (length (caddr p)))
-                  (null? (cdddr p))))
-          (interaction-environment))))
-
-(define (define-data% name cases)
-  (define-make%  name cases)
-  (define-pred%  name cases))
+(define (or-fold . xs)
+  (and (not (null? xs))
+       (or (car xs) (apply or-fold (cdr xs)))))
 
 (define-syntax define-data
   (syntax-rules ()
-    ((_ name ((case a ...) ...))
-     (define-data% (quote name) (quote ((case a ...) ...))))))
+    ((_ name ((dataname arg ...) ...))
+     (begin (map (lambda (types)
+                   (eval `(define ,types 
+                            (list 'name ',(car types) ,@(cdr types)))
+                         (interaction-environment)))
+                 '((dataname arg ...) ...))
+            (eval `(define (,(string->symbol 
+                              (string-append (symbol->string 'name) "?")) x)
+                     (and (list? x)
+                          (eq? 'name (car x))
+                          (let ((y (cdr x)))
+                            (apply or-fold 
+                                   ,`(map (lambda (types)
+                                            (and (eq? (car types) (car ,'y))
+                                                 (eq? (length types) 
+                                                      (length ,'y))))
+                                          '((dataname arg ...) ...))))))
+                  (interaction-environment))))))
 
 (define-syntax match
   (syntax-rules()
     ((_ p) #f)
     ((_ p ((type1 a1 ...) (body1 ...)) ((type2 a2 ...) (body2 ...)) ...)
-     (if (equal? (quote (type1 a1 ...)) (cadr p))
-         (let ((cp (cdadr p))
-               (ap (cddr p)))
-           (apply (eval `(lambda ,cp (body1 ...))(interaction-environment)) ap))
+     (if (and (equal? (quote type1) (cadr p))
+              (equal? (length (quote (type1 a1 ...))) (length (cdr p))))
+         (apply (eval `(lambda (a1 ...) (body1 ...))(interaction-environment)) 
+                (cddr p))
          (match p ((type2 a2 ...) (body2 ...)) ...)))))
 
 ;; tests

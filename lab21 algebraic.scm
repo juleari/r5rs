@@ -1,5 +1,4 @@
 ;(use-syntax (ice-9 syncase))
-
 (define (or-fold . xs)
   (and (not (null? xs))
        (or (car xs) (apply or-fold (cdr xs)))))
@@ -8,20 +7,18 @@
   (syntax-rules ()
     ((_ name ((dataname arg ...) ...))
      (begin (map (lambda (types)
-                   (eval `(define ,types 
-                            (list 'name ',(car types) ,@(cdr types)))
+                   (eval `(define ,types (list 'name ',(car types) ,@(cdr types)))
                          (interaction-environment)))
                  '((dataname arg ...) ...))
-            (eval `(define (,(string->symbol 
-                              (string-append (symbol->string 'name) "?")) x)
+            (eval `(define
+                     (,(string->symbol (string-append (symbol->string 'name) "?")) x)
                      (and (list? x)
                           (eq? 'name (car x))
                           (let ((y (cdr x)))
-                            (apply or-fold 
+                            (apply or-fold
                                    ,`(map (lambda (types)
                                             (and (eq? (car types) (car ,'y))
-                                                 (eq? (length types) 
-                                                      (length ,'y))))
+                                                 (eq? (length types) (length ,'y))))
                                           '((dataname arg ...) ...))))))
                   (interaction-environment))))))
 
@@ -30,8 +27,9 @@
     ((_ p) #f)
     ((_ p ((type1 a1 ...) (body1 ...)) ((type2 a2 ...) (body2 ...)) ...)
      (if (and (equal? (quote type1) (cadr p))
-              (equal? (length (quote (type1 a1 ...))) (length (cdr p))))
-         (apply (eval `(lambda (a1 ...) (body1 ...))(interaction-environment)) 
+              (eq? (length (quote (type1 a1 ...))) (length (cdr p))))
+         (apply (eval `(lambda (a1 ...) (body1 ...))
+                      (interaction-environment))
                 (cddr p))
          (match p ((type2 a2 ...) (body2 ...)) ...)))))
 
